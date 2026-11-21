@@ -1,0 +1,590 @@
+"-- SAS Hub Xmas | Muscle Legends (Delta Executor)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+if playerGui:FindFirstChild("SAS_Hub_Xmas_GUI") then
+	playerGui.SAS_Hub_Xmas_GUI:Destroy()
+end
+
+local State = {
+	AutoRep1500 = false,
+	UseWeights = true,
+	UseMachines = true,
+	BurstPerTick = 75,
+	RepInterval = 0.05,
+	AutoRebirth = false,
+	AutoBossAlien = false,
+	AutoBossRarity = false,
+	RarityCommon = false,
+	RarityRare = false,
+	RarityEpic = false,
+	RarityLegendary = false,
+	RarityMythic = false,
+	RarityRainbow = false,
+	SelectedPet = "Swift Samurai",
+	AutoBuyPet = false,
+	AutoEquipBestPets = false,
+	AutoClaimChests = false,
+	AutoWheelSpin = false,
+	AutoCollectOrbs = false,
+	FlyEnabled = false,
+	FlySpeed = 75,
+	WalkSpeed = 16,
+	JumpPower = 50,
+	InfiniteJump = false,
+	NoClip = false,
+	AntiAFK = true,
+	SnowEffect = true,
+	XmasLighting = false,
+	FullBright = false,
+	Minimized = false
+}
+
+local PetCatalog = {
+	"Swift Samurai",
+	"Tri-Dark Star",
+	"Chaos Griffin",
+	"Cybernetic Showdown Dragon",
+	"Eternal Strike Hydra",
+	"Ultra Hind",
+	"Wild Wizard"
+}
+
+local GymLocations = {
+	{name = "Spawn", pos = Vector3.new(0, 12, 0)},
+	{name = "Tiny Gym", pos = Vector3.new(-38, 12, 185)},
+	{name = "Frost Gym", pos = Vector3.new(-2620, 15, -410)},
+	{name = "Mythical Gym", pos = Vector3.new(2250, 15, 1070)},
+	{name = "Eternal Gym", pos = Vector3.new(-6750, 15, -1280)},
+	{name = "Legends Gym", pos = Vector3.new(4600, 995, -3890)},
+	{name = "Muscle King Gym", pos = Vector3.new(-8625, 25, -5730)},
+	{name = "Jungle Gym", pos = Vector3.new(-7650, 20, 2910)}
+}
+
+-- ==========================================
+-- INTERFAZ NAVIDEÑA "SAS HUB"
+-- ==========================================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SAS_Hub_Xmas_GUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = playerGui
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 500, 0, 340)
+MainFrame.Position = UDim2.new(0.5, -250, 0.5, -170)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 13, 17)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 14)
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(235, 185, 65)
+MainStroke.Thickness = 2
+MainStroke.Parent = MainFrame
+
+local SnowContainer = Instance.new("Frame")
+SnowContainer.Size = UDim2.new(1, 0, 1, 0)
+SnowContainer.BackgroundTransparency = 1
+SnowContainer.ZIndex = 2
+SnowContainer.Parent = MainFrame
+
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 42)
+TopBar.BackgroundColor3 = Color3.fromRGB(145, 24, 38)
+TopBar.BorderSizePixel = 0
+TopBar.ZIndex = 5
+TopBar.Parent = MainFrame
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 14)
+
+local TopFix = Instance.new("Frame")
+TopFix.Size = UDim2.new(1, 0, 0, 12)
+TopFix.Position = UDim2.new(0, 0, 1, -12)
+TopFix.BackgroundColor3 = Color3.fromRGB(145, 24, 38)
+TopFix.BorderSizePixel = 0
+TopFix.ZIndex = 5
+TopFix.Parent = TopBar
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(0.76, -14, 1, 0)
+TitleLabel.Position = UDim2.new(0, 14, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "🎄 SAS HUB  •  NAVIDAD MUSCLE LEGENDS ❄️"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 244, 214)
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 14
+TitleLabel.ZIndex = 6
+TitleLabel.Parent = TopBar
+
+local MinBtn = Instance.new("TextButton")
+MinBtn.Size = UDim2.new(0, 30, 0, 26)
+MinBtn.Position = UDim2.new(1, -68, 0.5, -13)
+MinBtn.BackgroundColor3 = Color3.fromRGB(24, 105, 62)
+MinBtn.Text = "-"
+MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.TextSize = 16
+MinBtn.ZIndex = 6
+MinBtn.Parent = TopBar
+Instance.new("UICorner", MinBtn).CornerRadius = UDim.new(0, 6)
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 30, 0, 26)
+CloseBtn.Position = UDim2.new(1, -34, 0.5, -13)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(95, 16, 26)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 235, 235)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 13
+CloseBtn.ZIndex = 6
+CloseBtn.Parent = TopBar
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
+
+local Sidebar = Instance.new("ScrollingFrame")
+Sidebar.Size = UDim2.new(0, 138, 1, -50)
+Sidebar.Position = UDim2.new(0, 8, 0, 46)
+Sidebar.BackgroundColor3 = Color3.fromRGB(22, 18, 24)
+Sidebar.BackgroundTransparency = 0.15
+Sidebar.BorderSizePixel = 0
+Sidebar.ScrollBarThickness = 2
+Sidebar.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
+Sidebar.ZIndex = 4
+Sidebar.Parent = MainFrame
+Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 10)
+
+local SideList = Instance.new("UIListLayout")
+SideList.Padding = UDim.new(0, 5)
+SideList.Parent = Sidebar
+
+local SidePad = Instance.new("UIPadding")
+SidePad.PaddingTop = UDim.new(0, 8)
+SidePad.PaddingLeft = UDim.new(0, 7)
+SidePad.PaddingRight = UDim.new(0, 7)
+SidePad.Parent = Sidebar
+
+local ContentArea = Instance.new("Frame")
+ContentArea.Size = UDim2.new(1, -158, 1, -50)
+ContentArea.Position = UDim2.new(0, 150, 0, 46)
+ContentArea.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
+ContentArea.BackgroundTransparency = 0.12
+ContentArea.BorderSizePixel = 0
+ContentArea.ZIndex = 4
+ContentArea.Parent = MainFrame
+Instance.new("UICorner", ContentArea).CornerRadius = UDim.new(0, 10)
+
+local Pages = {}
+local TabButtons = {}
+
+local function createPage(name)
+	local page = Instance.new("ScrollingFrame")
+	page.Name = name .. "_Page"
+	page.Size = UDim2.new(1, 0, 1, 0)
+	page.BackgroundTransparency = 1
+	page.ScrollBarThickness = 4
+	page.CanvasSize = UDim2.new(0, 0, 0, 0)
+	page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	page.Visible = false
+	page.ZIndex = 5
+	page.Parent = ContentArea
+
+	local layout = Instance.new("UIListLayout")
+	layout.Padding = UDim.new(0, 6)
+	layout.Parent = page
+
+	local pad = Instance.new("UIPadding")
+	pad.PaddingTop = UDim.new(0, 8)
+	pad.PaddingLeft = UDim.new(0, 8)
+	pad.PaddingRight = UDim.new(0, 8)
+	pad.PaddingBottom = UDim.new(0, 10)
+	pad.Parent = page
+
+	Pages[name] = page
+	return page
+end
+
+local function switchTab(name)
+	for tabName, page in pairs(Pages) do
+		page.Visible = (tabName == name)
+	end
+	for tabName, btn in pairs(TabButtons) do
+		if tabName == name then
+			btn.BackgroundColor3 = Color3.fromRGB(26, 128, 72)
+			btn.TextColor3 = Color3.fromRGB(255, 250, 230)
+		else
+			btn.BackgroundColor3 = Color3.fromRGB(36, 26, 34)
+			btn.TextColor3 = Color3.fromRGB(215, 210, 220)
+		end
+	end
+end
+
+local function addTab(name)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 32)
+	btn.BackgroundColor3 = Color3.fromRGB(36, 26, 34)
+	btn.Text = name
+	btn.TextColor3 = Color3.fromRGB(215, 210, 220)
+	btn.Font = Enum.Font.GothamSemibold
+	btn.TextSize = 11
+	btn.ZIndex = 5
+	btn.Parent = Sidebar
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+	TabButtons[name] = btn
+
+	local page = createPage(name)
+	btn.MouseButton1Click:Connect(function()
+		switchTab(name)
+	end)
+	return page
+end
+
+local function addToggle(parent, text, default, callback)
+	local active = default
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 32)
+	btn.BackgroundColor3 = active and Color3.fromRGB(28, 132, 74) or Color3.fromRGB(34, 30, 40)
+	btn.Text = (active and "🎄 [ON]  " or "❄️ [OFF] ") .. text
+	btn.TextColor3 = Color3.fromRGB(245, 245, 250)
+	btn.Font = Enum.Font.GothamSemibold
+	btn.TextSize = 11
+	btn.ZIndex = 6
+	btn.Parent = parent
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+
+	btn.MouseButton1Click:Connect(function()
+		active = not active
+		btn.BackgroundColor3 = active and Color3.fromRGB(28, 132, 74) or Color3.fromRGB(34, 30, 40)
+		btn.Text = (active and "🎄 [ON]  " or "❄️ [OFF] ") .. text
+		callback(active)
+	end)
+	return btn
+end
+
+local function addActionButton(parent, text, callback)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 30)
+	btn.BackgroundColor3 = Color3.fromRGB(52, 36, 48)
+	btn.Text = "🎁 " .. text
+	btn.TextColor3 = Color3.fromRGB(255, 242, 220)
+	btn.Font = Enum.Font.GothamSemibold
+	btn.TextSize = 11
+	btn.ZIndex = 6
+	btn.Parent = parent
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+	btn.MouseButton1Click:Connect(callback)
+	return btn
+end
+
+local function addNumberBox(parent, labelText, initialValue, callback)
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(1, 0, 0, 32)
+	frame.BackgroundColor3 = Color3.fromRGB(34, 30, 40)
+	frame.ZIndex = 6
+	frame.Parent = parent
+	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.new(0.65, -8, 1, 0)
+	lbl.Position = UDim2.new(0, 10, 0, 0)
+	lbl.BackgroundTransparency = 1
+	lbl.Text = labelText
+	lbl.TextColor3 = Color3.fromRGB(235, 232, 242)
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+	lbl.Font = Enum.Font.Gotham
+	lbl.TextSize = 11
+	lbl.ZIndex = 7
+	lbl.Parent = frame
+
+	local box = Instance.new("TextBox")
+	box.Size = UDim2.new(0.32, -6, 0, 22)
+	box.Position = UDim2.new(0.67, 0, 0.5, -11)
+	box.BackgroundColor3 = Color3.fromRGB(20, 18, 26)
+	box.Text = tostring(initialValue)
+	box.TextColor3 = Color3.fromRGB(255, 210, 95)
+	box.Font = Enum.Font.GothamBold
+	box.TextSize = 11
+	box.ClearTextOnFocus = false
+	box.ZIndex = 7
+	box.Parent = frame
+	Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
+
+	box.FocusLost:Connect(function()
+		local num = tonumber(box.Text)
+		if num then
+			callback(num)
+		else
+			box.Text = tostring(initialValue)
+		end
+	end)
+end
+
+-- ==========================================
+-- PESTAÑAS
+-- ==========================================
+local tabFarm   = addTab("💪 Farm 1500/s")
+local tabBoss   = addTab("👾 Bosses")
+local tabPets   = addTab("🐾 Pets")
+local tabGyms   = addTab("🏋️ Gyms")
+local tabMove   = addTab("🕊️ Fly & Stats")
+local tabVisual = addTab("🎄 Xmas & Auto")
+
+-- Farm 1500/s & Rebirth
+addToggle(tabFarm, "Auto Rep 1500/s (Pesas y Máquinas)", false, function(v) State.AutoRep1500 = v end)
+addToggle(tabFarm, "Usar Pesas", true, function(v) State.UseWeights = v end)
+addToggle(tabFarm, "Usar Máquinas", true, function(v) State.UseMachines = v end)
+addNumberBox(tabFarm, "Ráfaga por tick (75 = 1500/s)", State.BurstPerTick, function(v) State.BurstPerTick = math.clamp(math.floor(v), 1, 250) end)
+addToggle(tabFarm, "Auto Rebirth", false, function(v) State.AutoRebirth = v end)
+
+-- Bosses Alien y Rarezas
+addToggle(tabBoss, "Auto Boss ALIEN", false, function(v) State.AutoBossAlien = v end)
+addToggle(tabBoss, "Auto Boss por Rareza", false, function(v) State.AutoBossRarity = v end)
+addToggle(tabBoss, "Rareza: Común", false, function(v) State.RarityCommon = v end)
+addToggle(tabBoss, "Rareza: Raro", false, function(v) State.RarityRare = v end)
+addToggle(tabBoss, "Rareza: Épico", false, function(v) State.RarityEpic = v end)
+addToggle(tabBoss, "Rareza: Legendario", false, function(v) State.RarityLegendary = v end)
+addToggle(tabBoss, "Rareza: Mítico", false, function(v) State.RarityMythic = v end)
+addToggle(tabBoss, "Rareza: Rainbow", false, function(v) State.RarityRainbow = v end)
+
+-- Pets
+local petLabel = Instance.new("TextLabel")
+petLabel.Size = UDim2.new(1, 0, 0, 26)
+petLabel.BackgroundColor3 = Color3.fromRGB(30, 24, 36)
+petLabel.Text = "Pet seleccionada: " .. State.SelectedPet
+petLabel.TextColor3 = Color3.fromRGB(255, 225, 130)
+petLabel.Font = Enum.Font.GothamBold
+petLabel.TextSize = 11
+petLabel.ZIndex = 6
+petLabel.Parent = tabPets
+Instance.new("UICorner", petLabel).CornerRadius = UDim.new(0, 6)
+
+for _, pName in ipairs(PetCatalog) do
+	addActionButton(tabPets, "Elegir: " .. pName, function()
+		State.SelectedPet = pName
+		petLabel.Text = "Pet seleccionada: " .. State.SelectedPet
+	end)
+end
+
+local petBox = Instance.new("TextBox")
+petBox.Size = UDim2.new(1, 0, 0, 30)
+petBox.BackgroundColor3 = Color3.fromRGB(20, 18, 26)
+petBox.PlaceholderText = "Escribe el nombre de otra pet..."
+petBox.Text = ""
+petBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+petBox.Font = Enum.Font.Gotham
+petBox.TextSize = 11
+petBox.ZIndex = 6
+petBox.Parent = tabPets
+Instance.new("UICorner", petBox).CornerRadius = UDim.new(0, 8)
+petBox.FocusLost:Connect(function()
+	if petBox.Text ~= "" then
+		State.SelectedPet = petBox.Text
+		petLabel.Text = "Pet seleccionada: " .. State.SelectedPet
+	end
+end)
+
+local function buyPet(name)
+	for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
+		local n = string.lower(obj.Name)
+		if string.find(n, "pet") and (string.find(n, "buy") or string.find(n, "purchase") or string.find(n, "shop")) then
+			if obj:IsA("RemoteEvent") then
+				pcall(function() obj:FireServer(name) end)
+			elseif obj:IsA("RemoteFunction") then
+				pcall(function() obj:InvokeServer(name) end)
+			end
+		end
+	end
+end
+
+addActionButton(tabPets, "Comprar Pet Seleccionada", function() buyPet(State.SelectedPet) end)
+addToggle(tabPets, "Auto Comprar Pet", false, function(v) State.AutoBuyPet = v end)
+addToggle(tabPets, "Auto Equipar Mejores Pets", false, function(v) State.AutoEquipBestPets = v end)
+
+-- Gyms
+for _, gym in ipairs(GymLocations) do
+	addActionButton(tabGyms, "TP -> " .. gym.name, function()
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if root then
+			root.CFrame = CFrame.new(gym.pos)
+		end
+	end)
+end
+
+-- Fly & Stats
+addToggle(tabMove, "Fly (Espacio sube / Ctrl baja)", false, function(v) State.FlyEnabled = v end)
+addNumberBox(tabMove, "Velocidad Fly", State.FlySpeed, function(v) State.FlySpeed = math.clamp(v, 10, 400) end)
+addNumberBox(tabMove, "WalkSpeed", State.WalkSpeed, function(v) State.WalkSpeed = math.clamp(v, 8, 300) end)
+addNumberBox(tabMove, "JumpPower", State.JumpPower, function(v) State.JumpPower = math.clamp(v, 20, 400) end)
+addToggle(tabMove, "Salto Infinito", false, function(v) State.InfiniteJump = v end)
+addToggle(tabMove, "NoClip", false, function(v) State.NoClip = v end)
+
+-- Xmas & Auto
+addToggle(tabVisual, "Nieve en la UI", true, function(v)
+	State.SnowEffect = v
+	SnowContainer.Visible = v
+end)
+addToggle(tabVisual, "Ambiente Nocturno Navideño", false, function(v)
+	State.XmasLighting = v
+	Lighting.ClockTime = v and 0 or 14
+end)
+addToggle(tabVisual, "FullBright", false, function(v)
+	State.FullBright = v
+	Lighting.Brightness = v and 2.5 or 1
+end)
+addToggle(tabVisual, "Auto Reclamar Cofres", false, function(v) State.AutoClaimChests = v end)
+addToggle(tabVisual, "Auto Girar Ruleta", false, function(v) State.AutoWheelSpin = v end)
+addToggle(tabVisual, "Auto Recoger Orbes", false, function(v) State.AutoCollectOrbs = v end)
+addToggle(tabVisual, "Anti-AFK", true, function(v) State.AntiAFK = v end)
+
+MinBtn.MouseButton1Click:Connect(function()
+	State.Minimized = not State.Minimized
+	Sidebar.Visible = not State.Minimized
+	ContentArea.Visible = not State.Minimized
+	MainFrame.Size = State.Minimized and UDim2.new(0, 500, 0, 42) or UDim2.new(0, 500, 0, 340)
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+	State.AutoRep1500 = false
+	State.AutoRebirth = false
+	State.AutoBossAlien = false
+	State.AutoBossRarity = false
+	State.FlyEnabled = false
+	ScreenGui:Destroy()
+end)
+
+switchTab("💪 Farm 1500/s")
+
+task.spawn(function()
+	while ScreenGui.Parent do
+		if State.SnowEffect and MainFrame.Visible and not State.Minimized then
+			local flake = Instance.new("TextLabel")
+			flake.Size = UDim2.new(0, 14, 0, 14)
+			flake.Position = UDim2.new(math.random(), 0, -0.05, 0)
+			flake.BackgroundTransparency = 1
+			flake.Text = "❄"
+			flake.TextColor3 = Color3.fromRGB(235, 245, 255)
+			flake.TextTransparency = 0.35
+			flake.TextSize = math.random(9, 13)
+			flake.ZIndex = 3
+			flake.Parent = SnowContainer
+
+			local tw = TweenService:Create(flake, TweenInfo.new(math.random(3, 5), Enum.EasingStyle.Linear), {
+				Position = UDim2.new(flake.Position.X.Scale + (math.random(-10, 10) / 100), 0, 1.05, 0),
+				TextTransparency = 1
+			})
+			tw:Play()
+			tw.Completed:Connect(function()
+				flake:Destroy()
+			end)
+		end
+		task.wait(0.35)
+	end
+end)
+
+task.spawn(function()
+	while task.wait(State.RepInterval) do
+		if State.AutoRep1500 then
+			local char = player.Character
+			local root = char and char:FindFirstChild("HumanoidRootPart")
+			if State.UseWeights and char then
+				local tool = char:FindFirstChildOfClass("Tool")
+				if not tool and player:FindFirstChild("Backpack") then
+					for _, item in ipairs(player.Backpack:GetChildren()) do
+						if item:IsA("Tool") then
+							item.Parent = char
+							tool = item
+							break
+						end
+					end
+				end
+				if tool then
+					for _ = 1, State.BurstPerTick do
+						pcall(function() tool:Activate() end)
+					end
+				end
+			end
+			if State.UseMachines and root then
+				for _, obj in ipairs(Workspace:GetDescendants()) do
+					if obj:IsA("ProximityPrompt") then
+						local pName = string.lower(obj.Name .. " " .. obj.ActionText .. " " .. (obj.Parent and obj.Parent.Name or ""))
+						if string.find(pName, "bench") or string.find(pName, "machine") or string.find(pName, "lift") or string.find(pName, "train") then
+							local part = obj.Parent:IsA("BasePart") and obj.Parent or obj.Parent:FindFirstChildWhichIsA("BasePart")
+							if part and (root.Position - part.Position).Magnitude <= 35 then
+								pcall(function()
+									if fireproximityprompt then fireproximityprompt(obj) end
+								end)
+							end
+						end
+					end
+				end
+			end
+			for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
+				if obj:IsA("RemoteEvent") then
+					local n = string.lower(obj.Name)
+					if string.find(n, "rep") or string.find(n, "lift") or string.find(n, "muscle") or string.find(n, "machine") then
+						for _ = 1, math.min(State.BurstPerTick, 25) do
+							pcall(function() obj:FireServer("rep") end)
+						end
+					end
+				end
+			end
+		end
+	end
+end)
+
+task.spawn(function()
+	while task.wait(0.2) do
+		if State.AutoBossAlien or State.AutoBossRarity then
+			local char = player.Character
+			local root = char and char:FindFirstChild("HumanoidRootPart")
+			if root then
+				for _, obj in ipairs(Workspace:GetDescendants()) do
+					if obj:IsA("Model") and obj ~= char then
+						local bHum = obj:FindFirstChildOfClass("Humanoid")
+						local bRoot = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")
+						if bHum and bHum.Health > 0 and bRoot then
+							local info = string.lower(obj.Name)
+							local isAlien = State.AutoBossAlien and (string.find(info, "alien") or string.find(info, "ufo"))
+							local isRarity = State.AutoBossRarity and (
+								(State.RarityCommon and string.find(info, "common")) or
+								(State.RarityRare and string.find(info, "rare")) or
+								(State.RarityEpic and string.find(info, "epic")) or
+								(State.RarityLegendary and string.find(info, "legendary")) or
+								(State.RarityMythic and string.find(info, "mythic")) or
+								(State.RarityRainbow and string.find(info, "rainbow"))
+							)
+							if isAlien or isRarity then
+								root.CFrame = bRoot.CFrame * CFrame.new(0, 0, 4.5)
+								local tool = char:FindFirstChildOfClass("Tool")
+								if tool then
+									pcall(function() tool:Activate() end)
+								end
+								break
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end)
+
+task.spawn(function()
+	while task.wait(1.2) do
+		if State.AutoRebirth then
+			for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
+				if obj:IsA("RemoteEvent") and string.find(string.lower(obj.Name), "rebirth") then
+					pcall(function() obj"
+ https://gist.githubusercontent.com/nada648/c4313fc982ad6c00a5a1e7c8947e4f80/raw/b09c430be0e8765af3f9e32589eecb401c25fe21/sas_xmas.lua#:~:text=%2D%2D%20SAS%20Hub%20Xmas%20%7C%20Muscle,then%0A%09%09%09%09%09pcall(function()%20obj
