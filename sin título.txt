@@ -1,0 +1,298 @@
+"-- SAS Hub | Muscle Legends (10 Opciones - Delta Executor)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+if not player then return end
+
+local playerGui = player:WaitForChild("PlayerGui", 10)
+if not playerGui then return end
+
+local oldGui = playerGui:FindFirstChild("SAS_Hub_10")
+if oldGui then
+	oldGui:Destroy()
+end
+
+local State = {
+	FastRep1500 = false,
+	AutoRebirth = false,
+	AutoKillAlien = false,
+	AutoKillBosses = false,
+	AutoEquipTool = true,
+	AutoPunch = false,
+	AutoCollectOrbs = false,
+	AutoChests = false,
+	Fly = false,
+	AntiAFK = true
+}
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "SAS_Hub_10"
+gui.ResetOnSpawn = false
+gui.Parent = playerGui
+
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 320, 0, 360)
+main.Position = UDim2.new(0.5, -160, 0.5, -180)
+main.BackgroundColor3 = Color3.fromRGB(20, 18, 26)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+main.Parent = gui
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+
+local top = Instance.new("Frame")
+top.Size = UDim2.new(1, 0, 0, 36)
+top.BackgroundColor3 = Color3.fromRGB(145, 24, 38)
+top.BorderSizePixel = 0
+top.Parent = main
+Instance.new("UICorner", top).CornerRadius = UDim.new(0, 10)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -40, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "SAS HUB | MUSCLE LEGENDS (10)"
+title.TextColor3 = Color3.fromRGB(255, 245, 220)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Font = Enum.Font.GothamBold
+title.TextSize = 12
+title.Parent = top
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 26, 0, 24)
+closeBtn.Position = UDim2.new(1, -31, 0.5, -12)
+closeBtn.BackgroundColor3 = Color3.fromRGB(90, 15, 25)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 11
+closeBtn.Parent = top
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+closeBtn.MouseButton1Click:Connect(function()
+	for k, v in pairs(State) do
+		if type(v) == "boolean" then
+			State[k] = false
+		end
+	end
+	gui:Destroy()
+end)
+
+local listFrame = Instance.new("ScrollingFrame")
+listFrame.Size = UDim2.new(1, -16, 1, -46)
+listFrame.Position = UDim2.new(0, 8, 0, 41)
+listFrame.BackgroundTransparency = 1
+listFrame.ScrollBarThickness = 3
+listFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+listFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+listFrame.Parent = main
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 5)
+layout.Parent = listFrame
+
+local function makeToggle(key, label)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, 0, 0, 29)
+	btn.BackgroundColor3 = State[key] and Color3.fromRGB(26, 128, 72) or Color3.fromRGB(36, 32, 46)
+	btn.Text = (State[key] and "[ON]  " or "[OFF] ") .. label
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Font = Enum.Font.GothamSemibold
+	btn.TextSize = 11
+	btn.Parent = listFrame
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 7)
+
+	btn.MouseButton1Click:Connect(function()
+		State[key] = not State[key]
+		btn.BackgroundColor3 = State[key] and Color3.fromRGB(26, 128, 72) or Color3.fromRGB(36, 32, 46)
+		btn.Text = (State[key] and "[ON]  " or "[OFF] ") .. label
+	end)
+end
+
+-- Las 10 opciones
+makeToggle("FastRep1500", "1. Fast Rep 1500 (cada 0.1s)")
+makeToggle("AutoRebirth", "2. Auto Rebirth")
+makeToggle("AutoKillAlien", "3. Auto Kill Boss Alien")
+makeToggle("AutoKillBosses", "4. Auto Kill Bosses")
+makeToggle("AutoEquipTool", "5. Auto Equip Weight / Tool")
+makeToggle("AutoPunch", "6. Auto Punch")
+makeToggle("AutoCollectOrbs", "7. Auto Collect Orbs & Gems")
+makeToggle("AutoChests", "8. Auto Claim Chests")
+makeToggle("Fly", "9. Fly")
+makeToggle("AntiAFK", "10. Anti-AFK")
+
+local function getTool(keyword)
+	local char = player.Character
+	if not char then return nil end
+	local equipped = char:FindFirstChildOfClass("Tool")
+	if equipped and (not keyword or string.find(string.lower(equipped.Name), keyword)) then
+		return equipped
+	end
+	if State.AutoEquipTool and player:FindFirstChild("Backpack") then
+		for _, item in ipairs(player.Backpack:GetChildren()) do
+			if item:IsA("Tool") and (not keyword or string.find(string.lower(item.Name), keyword)) then
+				item.Parent = char
+				return item
+			end
+		end
+	end
+	return equipped
+end
+
+-- 1. Fast Rep 1500 cada 0.1s (150 por tick * 10 ticks/seg = 1500/s)
+task.spawn(function()
+	while task.wait(0.1) do
+		if State.FastRep1500 then
+			pcall(function()
+				local char = player.Character
+				local root = char and char:FindFirstChild("HumanoidRootPart")
+				local tool = getTool(nil)
+				if tool then
+					for _ = 1, 150 do
+						tool:Activate()
+					end
+				end
+				if root then
+					for _, obj in ipairs(Workspace:GetDescendants()) do
+						if obj:IsA("ProximityPrompt") then
+							local pName = string.lower(obj.Name .. " " .. obj.ActionText .. " " .. (obj.Parent and obj.Parent.Name or ""))
+							if string.find(pName, "bench") or string.find(pName, "machine") or string.find(pName, "lift") or string.find(pName, "train") then
+								local part = obj.Parent:IsA("BasePart") and obj.Parent or obj.Parent:FindFirstChildWhichIsA("BasePart")
+								if part and (root.Position - part.Position).Magnitude <= 35 and fireproximityprompt then
+									fireproximityprompt(obj)
+								end
+							end
+						end
+					end
+				end
+				for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
+					if obj:IsA("RemoteEvent") then
+						local n = string.lower(obj.Name)
+						if string.find(n, "rep") or string.find(n, "lift") or string.find(n, "muscle") or string.find(n, "machine") then
+							for _ = 1, 25 do
+								obj:FireServer("rep")
+							end
+						end
+					end
+				end
+			end)
+		end
+	end
+end)
+
+-- 3 y 4. Auto Kill Boss Alien y Auto Kill Bosses + 6. Auto Punch
+task.spawn(function()
+	while task.wait(0.15) do
+		pcall(function()
+			local char = player.Character
+			local root = char and char:FindFirstChild("HumanoidRootPart")
+
+			if (State.AutoKillAlien or State.AutoKillBosses) and root then
+				for _, obj in ipairs(Workspace:GetDescendants()) do
+					if obj:IsA("Model") and obj ~= char then
+						local hum = obj:FindFirstChildOfClass("Humanoid")
+						local bRoot = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")
+						if hum and hum.Health > 0 and bRoot then
+							local lower = string.lower(obj.Name)
+							local isAlien = string.find(lower, "alien") or string.find(lower, "ufo")
+							local isBoss = string.find(lower, "boss")
+							if (State.AutoKillAlien and isAlien) or (State.AutoKillBosses and (isBoss or isAlien)) then
+								root.CFrame = bRoot.CFrame * CFrame.new(0, 0, 4)
+								local punch = getTool("punch") or getTool(nil)
+								if punch then
+									punch:Activate()
+								end
+								break
+							end
+						end
+					end
+				end
+			end
+
+			if State.AutoPunch then
+				local punch = getTool("punch") or getTool(nil)
+				if punch then
+					punch:Activate()
+				end
+			end
+		end)
+	end
+end)
+
+-- 2. Auto Rebirth + 7. Orbs/Gems + 8. Chests
+task.spawn(function()
+	while task.wait(1) do
+		pcall(function()
+			if State.AutoRebirth then
+				for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
+					if obj:IsA("RemoteEvent") and string.find(string.lower(obj.Name), "rebirth") then
+						obj:FireServer()
+					end
+				end
+			end
+
+			if State.AutoChests then
+				for _, obj in ipairs(ReplicatedStorage:GetDescendants()) do
+					if obj:IsA("RemoteEvent") then
+						local n = string.lower(obj.Name)
+						if string.find(n, "chest") or string.find(n, "reward") then
+							obj:FireServer()
+						end
+					end
+				end
+			end
+
+			if State.AutoCollectOrbs then
+				local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+				if root then
+					for _, obj in ipairs(Workspace:GetDescendants()) do
+						if obj:IsA("BasePart") then
+							local n = string.lower(obj.Name)
+							if (string.find(n, "orb") or string.find(n, "gem")) and (root.Position - obj.Position).Magnitude <= 120 then
+								obj.CFrame = root.CFrame
+							end
+						end
+					end
+				end
+			end
+		end)
+	end
+end)
+
+-- 9. Fly
+RunService.RenderStepped:Connect(function()
+	pcall(function()
+		local char = player.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		local root = char and char:FindFirstChild("HumanoidRootPart")
+		if State.Fly and root and hum then
+			hum.PlatformStand = true
+			local dir = hum.MoveDirection
+			local vy = 0
+			if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+				vy = 75
+			elseif UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+				vy = -75
+			end
+			root.AssemblyLinearVelocity = Vector3.new(dir.X * 75, vy, dir.Z * 75)
+		elseif hum and hum.PlatformStand and not State.Fly then
+			hum.PlatformStand = false
+		end
+	end)
+end)
+
+-- 10. Anti-AFK
+player.Idled:Connect(function()
+	if State.AntiAFK then
+		pcall(function()
+			local vu = game:GetService("VirtualUser")
+			vu:CaptureController()
+			vu:ClickButton2(Vector2.new())
+		end)
+	end
+end)"
+ https://gist.githubusercontent.com/nada648/60a88828bb6a0fc3f9935b99a425d2d6/raw/c860a0ba8a2d0ec40de1ae7b64a80a047e5f314c/sas_xmas.lua#:~:text=%2D%2D%20SAS%20Hub%20%7C%20Muscle%20Legends,new())%0A%09%09end)%0A%09end%0Aend)
